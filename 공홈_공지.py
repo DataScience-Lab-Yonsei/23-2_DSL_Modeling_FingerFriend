@@ -1,203 +1,139 @@
-{
- "cells": [
-  {
-   "cell_type": "code",
-   "execution_count": 18,
-   "id": "82288beb",
-   "metadata": {},
-   "outputs": [
-    {
-     "name": "stderr",
-     "output_type": "stream",
-     "text": [
-      "C:\\Users\\user\\AppData\\Local\\Temp\\ipykernel_22912\\1153750980.py:9: DeprecationWarning: executable_path has been deprecated, please pass in a Service object\n",
-      "  driver = webdriver.Chrome('chromedriver.exe')\n"
-     ]
-    },
-    {
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "1번 페이지 크롤링중...\n",
-      "11번 페이지 크롤링중...\n",
-      "21번 페이지 크롤링중...\n",
-      "31번 페이지 크롤링중...\n",
-      "41번 페이지 크롤링중...\n",
-      "51번 페이지 크롤링중...\n",
-      "61번 페이지 크롤링중...\n",
-      "71번 페이지 크롤링중...\n",
-      "81번 페이지 크롤링중...\n",
-      "91번 페이지 크롤링중...\n",
-      "101번 페이지 크롤링중...\n",
-      "111번 페이지 크롤링중...\n",
-      "121번 페이지 크롤링중...\n",
-      "131번 페이지 크롤링중...\n",
-      "141번 페이지 크롤링중...\n"
-     ]
-    }
-   ],
-   "source": [
-    "from selenium import webdriver\n",
-    "from selenium.webdriver.common.by import By\n",
-    "from selenium.webdriver.support.ui import WebDriverWait\n",
-    "from selenium.webdriver.support import expected_conditions as EC\n",
-    "import pandas as pd\n",
-    "import tqdm.notebook as tqdm\n",
-    "from bs4 import BeautifulSoup\n",
-    "\n",
-    "if __name__ == \"__main__\":\n",
-    "    driver = webdriver.Chrome('chromedriver.exe')\n",
-    "    \n",
-    "    n = 0\n",
-    "    cnt = 0\n",
-    "    data_공지 = []\n",
-    "    \n",
-    "    while True:\n",
-    "        url_공지 = f\"https://www.yonsei.ac.kr/sc/support/notice.jsp?mode=list&board_no=15&pager.offset={n}\"\n",
-    "        driver.get(url_공지)\n",
-    "        cnt += 1\n",
-    "    \n",
-    "        wait = WebDriverWait(driver, 3)\n",
-    "        tbody = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, \"#jwxe_main_content > div.jwxe_board > div > ul\")))\n",
-    "    \n",
-    "        rows = tbody.find_elements(By.TAG_NAME, \"li\")\n",
-    "        \n",
-    "        if len(rows) <= 10:\n",
-    "            break\n",
-    "        elif (n % 100) == 0:\n",
-    "            print(f\"{cnt}번 페이지 크롤링중...\")\n",
-    "            \n",
-    "        if n == 0:\n",
-    "            for row in rows:\n",
-    "                title = row.find_element(By.CSS_SELECTOR, \"a > strong\").text.strip()\n",
-    "                link = row.find_element(By.CSS_SELECTOR, \"a\").get_attribute(\"href\").strip()\n",
-    "                web = row.find_element(By.CSS_SELECTOR, \"a > span\").text.strip()\n",
-    "                sub = row.find_element(By.CSS_SELECTOR, \"a > span > span:nth-child(1)\").text.strip()\n",
-    "                date = row.find_element(By.CSS_SELECTOR, \"a > span > span:nth-child(2)\").text.strip()\n",
-    "    \n",
-    "                data_공지.append([web, sub, title, link, date])\n",
-    "        else:\n",
-    "            for row in rows[6:]:\n",
-    "                title = row.find_element(By.CSS_SELECTOR, \"a > strong\").text.strip()\n",
-    "                link = row.find_element(By.CSS_SELECTOR, \"a\").get_attribute(\"href\").strip()\n",
-    "                web = row.find_element(By.CSS_SELECTOR, \"a > span\").text.strip()\n",
-    "                sub = row.find_element(By.CSS_SELECTOR, \"a > span > span:nth-child(1)\").text.strip()\n",
-    "                date = row.find_element(By.CSS_SELECTOR, \"a > span > span:nth-child(2)\").text.strip()\n",
-    "    \n",
-    "                data_공지.append([web, sub, title, link, date])      \n",
-    "            \n",
-    "        n += 10\n",
-    "        \n",
-    "    driver.quit()\n",
-    "    \n",
-    "    df_공지 = pd.DataFrame(data_공지, columns=[\"학과\", \"서브\", \"제목\", \"링크\", \"등록일\"])\n",
-    "\n",
-    "    df_공지['학과'] = df_공지['학과'].apply(lambda x: x.split(' ')[0])\n",
-    "\n",
-    "    ## 외부 기관 공고\n",
-    "    \n",
-    "    driver = webdriver.Chrome('chromedriver.exe')\n",
-    "    \n",
-    "    n = 0\n",
-    "    cnt = 0\n",
-    "    data_외부 = []\n",
-    "    \n",
-    "    while True:\n",
-    "        url_외부 = f\"https://www.yonsei.ac.kr/sc/support/etc_notice.jsp?mode=list&board_no=43&pager.offset={n}\"\n",
-    "        driver.get(url_외부)\n",
-    "        cnt += 1\n",
-    "    \n",
-    "        wait = WebDriverWait(driver, 3)\n",
-    "        tbody = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, \"#jwxe_main_content > div.jwxe_board > div > ul\")))\n",
-    "    \n",
-    "        rows = tbody.find_elements(By.TAG_NAME, \"li\")\n",
-    "        \n",
-    "        if len(rows) <= 3:\n",
-    "            break\n",
-    "        elif (n % 100) == 0:\n",
-    "            print(f\"{cnt}번 페이지 크롤링중...\")\n",
-    "            \n",
-    "        for row in rows:\n",
-    "            title = row.find_element(By.CSS_SELECTOR, \"a > strong\").text.strip()\n",
-    "            link = row.find_element(By.CSS_SELECTOR, \"a\").get_attribute(\"href\").strip()\n",
-    "            web = row.find_element(By.CSS_SELECTOR, \"a > span\").text.strip()\n",
-    "            sub = row.find_element(By.CSS_SELECTOR, \"a > span > span:nth-child(1)\").text.strip()\n",
-    "            date = row.find_element(By.CSS_SELECTOR, \"a > span > span:nth-child(2)\").text.strip()\n",
-    "    \n",
-    "            data_외부.append([web, sub, title, link, date])    \n",
-    "            \n",
-    "        n += 10\n",
-    "        \n",
-    "    driver.quit()\n",
-    "    \n",
-    "    df_외부 = pd.DataFrame(data_외부, columns=[\"학과\", \"서브\", \"제목\", \"링크\", \"등록일\"])\n",
-    "    df_외부['학과'] = df_외부['학과'].apply(lambda x: x.split(' ')[0])\n",
-    "\n",
-    "    ## 코로나19 관련 공지사항\n",
-    "    \n",
-    "    driver = webdriver.Chrome('chromedriver.exe')\n",
-    "    \n",
-    "    n = 0\n",
-    "    cnt = 0\n",
-    "    data_코로나 = []\n",
-    "    \n",
-    "    while True:\n",
-    "        url_코로나 = f\"https://www.yonsei.ac.kr/sc/support/corona_notice.jsp?mode=list&board_no=752&pager.offset={n}\"\n",
-    "        driver.get(url_코로나)\n",
-    "        cnt += 1\n",
-    "    \n",
-    "        wait = WebDriverWait(driver, 3)\n",
-    "        tbody = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, \"#jwxe_main_content > div.jwxe_board > div > ul\")))\n",
-    "    \n",
-    "        rows = tbody.find_elements(By.TAG_NAME, \"li\")\n",
-    "        \n",
-    "        if len(rows) <= 3:\n",
-    "            break\n",
-    "        elif (n % 100) == 0:\n",
-    "            print(f\"{cnt}번 페이지 크롤링중...\")\n",
-    "            \n",
-    "        for row in rows:\n",
-    "            title = row.find_element(By.CSS_SELECTOR, \"a > strong\").text.strip()\n",
-    "            link = row.find_element(By.CSS_SELECTOR, \"a\").get_attribute(\"href\").strip()\n",
-    "            web = row.find_element(By.CSS_SELECTOR, \"a > span\").text.strip()\n",
-    "            sub = row.find_element(By.CSS_SELECTOR, \"a > span > span:nth-child(1)\").text.strip()\n",
-    "            date = row.find_element(By.CSS_SELECTOR, \"a > span > span:nth-child(2)\").text.strip()\n",
-    "    \n",
-    "            data_코로나.append([web, sub, title, link, date])    \n",
-    "            \n",
-    "        n += 10\n",
-    "        \n",
-    "    driver.quit()\n",
-    "    \n",
-    "    df_코로나 = pd.DataFrame(data_코로나, columns=[\"학과\", \"서브\", \"제목\", \"링크\", \"등록일\"])\n",
-    "    df_코로나['학과'] = df_코로나['학과'].apply(lambda x: x.split(' ')[0])\n",
-    "\n",
-    "    ## concat 후 저장\n",
-    "    \n",
-    "    df_공홈 = pd.concat([df_공지, df_외부, df_코로나])\n",
-    "    df_공홈.to_csv('공홈.csv', index = False)"
-   ]
-  }
- ],
- "metadata": {
-  "kernelspec": {
-   "display_name": "Python 3 (ipykernel)",
-   "language": "python",
-   "name": "python3"
-  },
-  "language_info": {
-   "codemirror_mode": {
-    "name": "ipython",
-    "version": 3
-   },
-   "file_extension": ".py",
-   "mimetype": "text/x-python",
-   "name": "python",
-   "nbconvert_exporter": "python",
-   "pygments_lexer": "ipython3",
-   "version": "3.9.15"
-  }
- },
- "nbformat": 4,
- "nbformat_minor": 5
-}
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+import pandas as pd
+import tqdm.notebook as tqdm
+from bs4 import BeautifulSoup
+
+if __name__ == "__main__":
+    driver = webdriver.Chrome('chromedriver.exe')
+    
+    n = 0
+    cnt = 0
+    data_공지 = []
+    
+    while True:
+        url_공지 = f"https://www.yonsei.ac.kr/sc/support/notice.jsp?mode=list&board_no=15&pager.offset={n}"
+        driver.get(url_공지)
+        cnt += 1
+    
+        wait = WebDriverWait(driver, 3)
+        tbody = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "#jwxe_main_content > div.jwxe_board > div > ul")))
+    
+        rows = tbody.find_elements(By.TAG_NAME, "li")
+        
+        if len(rows) <= 10:
+            break
+        elif (n % 100) == 0:
+            print(f"{cnt}번 페이지 크롤링중...")
+            
+        if n == 0:
+            for row in rows:
+                title = row.find_element(By.CSS_SELECTOR, "a > strong").text.strip()
+                link = row.find_element(By.CSS_SELECTOR, "a").get_attribute("href").strip()
+                web = row.find_element(By.CSS_SELECTOR, "a > span").text.strip()
+                sub = row.find_element(By.CSS_SELECTOR, "a > span > span:nth-child(1)").text.strip()
+                date = row.find_element(By.CSS_SELECTOR, "a > span > span:nth-child(2)").text.strip()
+    
+                data_공지.append([web, sub, title, link, date])
+        else:
+            for row in rows[6:]:
+                title = row.find_element(By.CSS_SELECTOR, "a > strong").text.strip()
+                link = row.find_element(By.CSS_SELECTOR, "a").get_attribute("href").strip()
+                web = row.find_element(By.CSS_SELECTOR, "a > span").text.strip()
+                sub = row.find_element(By.CSS_SELECTOR, "a > span > span:nth-child(1)").text.strip()
+                date = row.find_element(By.CSS_SELECTOR, "a > span > span:nth-child(2)").text.strip()
+    
+                data_공지.append([web, sub, title, link, date])      
+            
+        n += 10
+        
+    driver.quit()
+    
+    df_공지 = pd.DataFrame(data_공지, columns=["학과", "서브", "제목", "링크", "등록일"])
+
+    df_공지['학과'] = df_공지['학과'].apply(lambda x: x.split(' ')[0])
+
+    ## 외부 기관 공고
+    
+    driver = webdriver.Chrome('chromedriver.exe')
+    
+    n = 0
+    cnt = 0
+    data_외부 = []
+    
+    while True:
+        url_외부 = f"https://www.yonsei.ac.kr/sc/support/etc_notice.jsp?mode=list&board_no=43&pager.offset={n}"
+        driver.get(url_외부)
+        cnt += 1
+    
+        wait = WebDriverWait(driver, 3)
+        tbody = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "#jwxe_main_content > div.jwxe_board > div > ul")))
+    
+        rows = tbody.find_elements(By.TAG_NAME, "li")
+        
+        if len(rows) <= 3:
+            break
+        elif (n % 100) == 0:
+            print(f"{cnt}번 페이지 크롤링중...")
+            
+        for row in rows:
+            title = row.find_element(By.CSS_SELECTOR, "a > strong").text.strip()
+            link = row.find_element(By.CSS_SELECTOR, "a").get_attribute("href").strip()
+            web = row.find_element(By.CSS_SELECTOR, "a > span").text.strip()
+            sub = row.find_element(By.CSS_SELECTOR, "a > span > span:nth-child(1)").text.strip()
+            date = row.find_element(By.CSS_SELECTOR, "a > span > span:nth-child(2)").text.strip()
+    
+            data_외부.append([web, sub, title, link, date])    
+            
+        n += 10
+        
+    driver.quit()
+    
+    df_외부 = pd.DataFrame(data_외부, columns=["학과", "서브", "제목", "링크", "등록일"])
+    df_외부['학과'] = df_외부['학과'].apply(lambda x: x.split(' ')[0])
+
+    ## 코로나19 관련 공지사항
+    
+    driver = webdriver.Chrome('chromedriver.exe')
+    
+    n = 0
+    cnt = 0
+    data_코로나 = []
+    
+    while True:
+        url_코로나 = f"https://www.yonsei.ac.kr/sc/support/corona_notice.jsp?mode=list&board_no=752&pager.offset={n}"
+        driver.get(url_코로나)
+        cnt += 1
+    
+        wait = WebDriverWait(driver, 3)
+        tbody = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "#jwxe_main_content > div.jwxe_board > div > ul")))
+    
+        rows = tbody.find_elements(By.TAG_NAME, "li")
+        
+        if len(rows) <= 3:
+            break
+        elif (n % 100) == 0:
+            print(f"{cnt}번 페이지 크롤링중...")
+            
+        for row in rows:
+            title = row.find_element(By.CSS_SELECTOR, "a > strong").text.strip()
+            link = row.find_element(By.CSS_SELECTOR, "a").get_attribute("href").strip()
+            web = row.find_element(By.CSS_SELECTOR, "a > span").text.strip()
+            sub = row.find_element(By.CSS_SELECTOR, "a > span > span:nth-child(1)").text.strip()
+            date = row.find_element(By.CSS_SELECTOR, "a > span > span:nth-child(2)").text.strip()
+    
+            data_코로나.append([web, sub, title, link, date])    
+            
+        n += 10
+        
+    driver.quit()
+    
+    df_코로나 = pd.DataFrame(data_코로나, columns=["학과", "서브", "제목", "링크", "등록일"])
+    df_코로나['학과'] = df_코로나['학과'].apply(lambda x: x.split(' ')[0])
+
+    ## concat 후 저장
+    
+    df_공홈 = pd.concat([df_공지, df_외부, df_코로나])
+    df_공홈.to_csv('공홈.csv', index = False)

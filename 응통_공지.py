@@ -1,169 +1,126 @@
-{
- "cells": [
-  {
-   "cell_type": "code",
-   "execution_count": 32,
-   "id": "e7f76e1a",
-   "metadata": {},
-   "outputs": [
-    {
-     "name": "stderr",
-     "output_type": "stream",
-     "text": [
-      "C:\\Users\\user\\AppData\\Local\\Temp\\ipykernel_13916\\2720822956.py:12: DeprecationWarning: executable_path has been deprecated, please pass in a Service object\n",
-      "  driver = webdriver.Chrome('chromedriver.exe')\n"
-     ]
-    }
-   ],
-   "source": [
-    "from selenium import webdriver\n",
-    "from selenium.webdriver.common.by import By\n",
-    "from selenium.webdriver.support.ui import WebDriverWait\n",
-    "from selenium.webdriver.support import expected_conditions as EC\n",
-    "import pandas as pd\n",
-    "import tqdm.notebook as tqdm\n",
-    "from bs4 import BeautifulSoup\n",
-    "\n",
-    "if __name__ == \"__main__\":\n",
-    "    ## 학부 공지\n",
-    "    web = '응용통계학과'\n",
-    "    sub = \"학부\"\n",
-    "    \n",
-    "    driver = webdriver.Chrome('chromedriver.exe')\n",
-    "    \n",
-    "    n = 0\n",
-    "    data_학부 = []\n",
-    "    num = 100_000\n",
-    "    \n",
-    "    while True:\n",
-    "        if num < 2:\n",
-    "            break\n",
-    "            \n",
-    "        url_학부 = f\"https://stat.yonsei.ac.kr/stat/board/under_notice.do?mode=list&&articleLimit=10&article.offset={n}\"\n",
-    "        driver.get(url_학부)\n",
-    "        n += 10\n",
-    "    \n",
-    "        wait = WebDriverWait(driver, 3)\n",
-    "        tbody = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, \"#jwxe_main_content > div > div > div > table > tbody\")))\n",
-    "    \n",
-    "        rows = tbody.find_elements(By.TAG_NAME, \"tr\")\n",
-    "    \n",
-    "        for row in rows:\n",
-    "            number = row.find_element(By.CSS_SELECTOR, \"td:nth-child(1)\").text.strip()\n",
-    "        \n",
-    "            if number != \"공지\":\n",
-    "                num = int(number)\n",
-    "                title = row.find_element(By.CSS_SELECTOR, \"td.text-left > div.c-board-title-wrap\").text.strip()\n",
-    "                link = row.find_element(By.CSS_SELECTOR, \"td.text-left > div.c-board-title-wrap > a\").get_attribute(\"href\").strip()\n",
-    "                date = row.find_element(By.CSS_SELECTOR, \"td:nth-child(5)\").text.strip()\n",
-    "            \n",
-    "                data_학부.append([web, sub, num, title, link, date])\n",
-    "        \n",
-    "    driver.quit()\n",
-    "    \n",
-    "    df_학부 = pd.DataFrame(data_학부, columns=[\"학과\", \"서브\", \"id\", \"제목\", \"링크\", \"등록일\"])\n",
-    "\n",
-    "    ## 대학원 공지\n",
-    "    web = '응용통계학과'\n",
-    "    sub = \"대학원\"\n",
-    "    \n",
-    "    driver = webdriver.Chrome('chromedriver.exe')\n",
-    "    \n",
-    "    n = 0\n",
-    "    data_대학원 = []\n",
-    "    num = 100_000\n",
-    "    \n",
-    "    while True:\n",
-    "        if num < 2:\n",
-    "            break\n",
-    "            \n",
-    "        url_대학원 = f\"https://stat.yonsei.ac.kr/stat/board/grad_notice.do?mode=list&&articleLimit=10&article.offset={n}\"\n",
-    "        driver.get(url_대학원)\n",
-    "        n += 10\n",
-    "    \n",
-    "        wait = WebDriverWait(driver, 3)\n",
-    "        tbody = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, \"#jwxe_main_content > div > div > div > table > tbody\")))\n",
-    "    \n",
-    "        rows = tbody.find_elements(By.TAG_NAME, \"tr\")\n",
-    "    \n",
-    "        for row in rows:\n",
-    "            number = row.find_element(By.CSS_SELECTOR, \"td:nth-child(1)\").text.strip()\n",
-    "        \n",
-    "            if number != \"공지\":\n",
-    "                num = int(number)\n",
-    "                title = row.find_element(By.CSS_SELECTOR, \"td.text-left > div.c-board-title-wrap\").text.strip()\n",
-    "                link = row.find_element(By.CSS_SELECTOR, \"td.text-left > div.c-board-title-wrap > a\").get_attribute(\"href\").strip()\n",
-    "                date = row.find_element(By.CSS_SELECTOR, \"td:nth-child(5)\").text.strip()\n",
-    "            \n",
-    "                data_대학원.append([web, sub, num, title, link, date])\n",
-    "        \n",
-    "    driver.quit()\n",
-    "    \n",
-    "    df_대학원 = pd.DataFrame(data_대학원, columns=[\"학과\", \"서브\", \"id\", \"제목\", \"링크\", \"등록일\"])\n",
-    "\n",
-    "    ## 취업 공지\n",
-    "    web = '응용통계학과'\n",
-    "    sub = \"취업\"\n",
-    "    \n",
-    "    driver = webdriver.Chrome('chromedriver.exe')\n",
-    "    \n",
-    "    n = 0\n",
-    "    data_취업 = []\n",
-    "    num = 100_000\n",
-    "    \n",
-    "    while True:\n",
-    "        if num < 2:\n",
-    "            break\n",
-    "            \n",
-    "        url_취업 = f\"https://stat.yonsei.ac.kr/stat/board/job.do?mode=list&&articleLimit=10&article.offset={n}\"\n",
-    "        driver.get(url_취업)\n",
-    "        n += 10\n",
-    "    \n",
-    "        wait = WebDriverWait(driver, 3)\n",
-    "        tbody = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, \"#jwxe_main_content > div > div > div > table > tbody\")))\n",
-    "    \n",
-    "        rows = tbody.find_elements(By.TAG_NAME, \"tr\")\n",
-    "    \n",
-    "        for row in rows:\n",
-    "            number = row.find_element(By.CSS_SELECTOR, \"td:nth-child(1)\").text.strip()\n",
-    "        \n",
-    "            if number != \"공지\":\n",
-    "                num = int(number)\n",
-    "                title = row.find_element(By.CSS_SELECTOR, \"td.text-left > div.c-board-title-wrap\").text.strip()\n",
-    "                link = row.find_element(By.CSS_SELECTOR, \"td.text-left > div.c-board-title-wrap > a\").get_attribute(\"href\").strip()\n",
-    "                date = row.find_element(By.CSS_SELECTOR, \"td:nth-child(5)\").text.strip()\n",
-    "            \n",
-    "                data_취업.append([web, sub, num, title, link, date])\n",
-    "        \n",
-    "    driver.quit()\n",
-    "    \n",
-    "    df_취업 = pd.DataFrame(data_취업, columns=[\"학과\", \"서브\", \"id\", \"제목\", \"링크\", \"등록일\"])\n",
-    "\n",
-    "    ## concat them all\n",
-    "    df_응통 = pd.concat([df_학부, df_대학원, df_취업])\n",
-    "    df_응통.to_csv('응통.csv', index = False)"
-   ]
-  }
- ],
- "metadata": {
-  "kernelspec": {
-   "display_name": "Python 3 (ipykernel)",
-   "language": "python",
-   "name": "python3"
-  },
-  "language_info": {
-   "codemirror_mode": {
-    "name": "ipython",
-    "version": 3
-   },
-   "file_extension": ".py",
-   "mimetype": "text/x-python",
-   "name": "python",
-   "nbconvert_exporter": "python",
-   "pygments_lexer": "ipython3",
-   "version": "3.9.15"
-  }
- },
- "nbformat": 4,
- "nbformat_minor": 5
-}
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+import pandas as pd
+import tqdm.notebook as tqdm
+from bs4 import BeautifulSoup
+
+if __name__ == "__main__":
+    ## 학부 공지
+    web = '응용통계학과'
+    sub = "학부"
+    
+    driver = webdriver.Chrome('chromedriver.exe')
+    
+    n = 0
+    data_학부 = []
+    num = 100_000
+    
+    while True:
+        if num < 2:
+            break
+            
+        url_학부 = f"https://stat.yonsei.ac.kr/stat/board/under_notice.do?mode=list&&articleLimit=10&article.offset={n}"
+        driver.get(url_학부)
+        n += 10
+    
+        wait = WebDriverWait(driver, 3)
+        tbody = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "#jwxe_main_content > div > div > div > table > tbody")))
+    
+        rows = tbody.find_elements(By.TAG_NAME, "tr")
+    
+        for row in rows:
+            number = row.find_element(By.CSS_SELECTOR, "td:nth-child(1)").text.strip()
+        
+            if number != "공지":
+                num = int(number)
+                title = row.find_element(By.CSS_SELECTOR, "td.text-left > div.c-board-title-wrap").text.strip()
+                link = row.find_element(By.CSS_SELECTOR, "td.text-left > div.c-board-title-wrap > a").get_attribute("href").strip()
+                date = row.find_element(By.CSS_SELECTOR, "td:nth-child(5)").text.strip()
+            
+                data_학부.append([web, sub, num, title, link, date])
+        
+    driver.quit()
+    
+    df_학부 = pd.DataFrame(data_학부, columns=["학과", "서브", "id", "제목", "링크", "등록일"])
+
+    ## 대학원 공지
+    web = '응용통계학과'
+    sub = "대학원"
+    
+    driver = webdriver.Chrome('chromedriver.exe')
+    
+    n = 0
+    data_대학원 = []
+    num = 100_000
+    
+    while True:
+        if num < 2:
+            break
+            
+        url_대학원 = f"https://stat.yonsei.ac.kr/stat/board/grad_notice.do?mode=list&&articleLimit=10&article.offset={n}"
+        driver.get(url_대학원)
+        n += 10
+    
+        wait = WebDriverWait(driver, 3)
+        tbody = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "#jwxe_main_content > div > div > div > table > tbody")))
+    
+        rows = tbody.find_elements(By.TAG_NAME, "tr")
+    
+        for row in rows:
+            number = row.find_element(By.CSS_SELECTOR, "td:nth-child(1)").text.strip()
+        
+            if number != "공지":
+                num = int(number)
+                title = row.find_element(By.CSS_SELECTOR, "td.text-left > div.c-board-title-wrap").text.strip()
+                link = row.find_element(By.CSS_SELECTOR, "td.text-left > div.c-board-title-wrap > a").get_attribute("href").strip()
+                date = row.find_element(By.CSS_SELECTOR, "td:nth-child(5)").text.strip()
+            
+                data_대학원.append([web, sub, num, title, link, date])
+        
+    driver.quit()
+    
+    df_대학원 = pd.DataFrame(data_대학원, columns=["학과", "서브", "id", "제목", "링크", "등록일"])
+
+    ## 취업 공지
+    web = '응용통계학과'
+    sub = "취업"
+    
+    driver = webdriver.Chrome('chromedriver.exe')
+    
+    n = 0
+    data_취업 = []
+    num = 100_000
+    
+    while True:
+        if num < 2:
+            break
+            
+        url_취업 = f"https://stat.yonsei.ac.kr/stat/board/job.do?mode=list&&articleLimit=10&article.offset={n}"
+        driver.get(url_취업)
+        n += 10
+    
+        wait = WebDriverWait(driver, 3)
+        tbody = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "#jwxe_main_content > div > div > div > table > tbody")))
+    
+        rows = tbody.find_elements(By.TAG_NAME, "tr")
+    
+        for row in rows:
+            number = row.find_element(By.CSS_SELECTOR, "td:nth-child(1)").text.strip()
+        
+            if number != "공지":
+                num = int(number)
+                title = row.find_element(By.CSS_SELECTOR, "td.text-left > div.c-board-title-wrap").text.strip()
+                link = row.find_element(By.CSS_SELECTOR, "td.text-left > div.c-board-title-wrap > a").get_attribute("href").strip()
+                date = row.find_element(By.CSS_SELECTOR, "td:nth-child(5)").text.strip()
+            
+                data_취업.append([web, sub, num, title, link, date])
+        
+    driver.quit()
+    
+    df_취업 = pd.DataFrame(data_취업, columns=["학과", "서브", "id", "제목", "링크", "등록일"])
+
+    ## concat them all
+    df_응통 = pd.concat([df_학부, df_대학원, df_취업])
+    df_응통.to_csv('응통.csv', index = False)
