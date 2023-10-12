@@ -1,10 +1,15 @@
-# 23-2_DSL_Modeling_each_team_project_name
+# 23-2_DSL_Modeling_FingerFriend
 ---
 ## 주제
-## Team A 팀장 팀원 팀원 팀원
+## Team C 9기 조의현 유희조 이승원 10기 박태정 신재우
 ---
 # Overview
-[발표자료](팀별/깃허브_내_발표자료_주소)
+[공지 크롤링](https://github.com/a2ran/DSL-23-2-FingerFriend/blob/main/%EA%B3%B5%ED%99%88_%EA%B3%B5%EC%A7%80.py)
+
+[게시글 크롤링](https://github.com/a2ran/DSL-23-2-FingerFriend/blob/main/%EA%B3%B5%ED%99%88_%EA%B2%8C%EC%8B%9C%EA%B8%80.py)
+
+[]()
+
 ## 1. Overall Pipeline
 (이미지)
 (설명은 마음대로)
